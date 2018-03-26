@@ -1,0 +1,96 @@
+version: '3'
+
+
+services:
+  eureka:
+    image: anapsix/alpine-java:8_jdk_unlimited
+    ports:
+      - '8761:8761'
+    working_dir: /app
+    volumes:
+      - ./eureka-server:/app
+    command: './gradlew bootRun'
+    environment:
+      - GRADLE_USER_HOME=cache
+      - SPRING_PROFILES_ACTIVE=dev
+  api-gateway:
+    image: anapsix/alpine-java:8_jdk_unlimited
+    ports:
+      - '8080:8080'
+    working_dir: /app
+    volumes:
+      - ./api-gateway:/app
+    depends_on:
+      - eureka
+    command: './gradlew bootRun'
+    environment:
+      - GRADLE_USER_HOME=cache
+      - SPRING_PROFILES_ACTIVE=dev
+  users-api:
+    image: anapsix/alpine-java:8_jdk_unlimited
+    ports:
+      - '8081:8081'
+    working_dir: /app
+    volumes:
+      - ./users-api:/app
+    depends_on:
+      - eureka 
+    command: './gradlew bootRun'
+    environment:
+      - GRADLE_USER_HOME=cache
+      - SPRING_PROFILES_ACTIVE=dev
+  cars-api:
+    image: anapsix/alpine-java:8_jdk_unlimited
+    ports:
+      - '8082:8082'
+    working_dir: /app
+    volumes:
+      - ./cars-api:/app
+    depends_on:
+      - eureka 
+    command: './gradlew bootRun'
+    environment:
+      - GRADLE_USER_HOME=cache
+      - SPRING_PROFILES_ACTIVE=dev
+  bikes-api:
+    image: anapsix/alpine-java:8_jdk_unlimited
+    ports:
+      - '8083:8083'
+    working_dir: /app
+    volumes:
+      - ./bikes-api:/app
+    depends_on:
+      - eureka 
+    command: './gradlew bootRun'
+    environment:
+      - GRADLE_USER_HOME=cache
+      - SPRING_PROFILES_ACTIVE=dev
+  postgresdev:
+    image: postgres
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=pgdev
+  react-ui:
+    image: node
+    ports:
+      - '3000:3000'
+    working_dir: /app
+    volumes:
+      - ./react-ui:/app
+    command: 'npm start'
+  # flyway:
+  #   image: boxfuse/flyway
+  #   command: -url=jdbc:postgresql://localhost:5432/pgdev -user=postgres -password=password migrate
+  #   volumes:
+  #     - ./bar:/flyway/sql
+  #   depends_on:
+  #     - postgresdev
+  #     - react-ui
+  #     - bikes-api
+  #     - cars-api
+  #     - users-api
+  #     - api-gateway
+  #     - eureka
